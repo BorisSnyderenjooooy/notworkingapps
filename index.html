@@ -2,67 +2,68 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        // Direkt-Check beim Laden
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentId = urlParams.get('id');
+        // TRICK 1: Die ID sofort aus der URL ziehen
+        const p = new URLSearchParams(window.location.search);
+        const id = p.get('id');
 
-        if (currentId) {
-            // Wir erzwingen das Meta-Tag VOR allem anderen
-            const metaTag = document.createElement('meta');
-            metaTag.name = "apple-itunes-app";
-            metaTag.content = "app-id=" + currentId;
-            document.head.appendChild(metaTag);
+        if (id) {
+            // TRICK 2: Wir bauen das Meta-Tag VOR allem anderen ein.
+            // Wir fügen "mt=8" (steht für App Store) hinzu, das hilft Safari beim Erkennen.
+            const meta = document.createElement('meta');
+            meta.name = "apple-itunes-app";
+            
+            // Wir fügen ein fiktives app-argument hinzu, das simuliert eine tiefere Verknüpfung
+            meta.content = `app-id=${id}, app-argument=https://apps.apple.com/app/id${id}, affiliate-data=ct=install_button&mt=8`;
+            
+            document.head.appendChild(meta);
         }
     </script>
-    <title>App Center</title>
+    <title>App Installer</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; text-align: center; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 20px auto; }
-        .app-item { border-bottom: 1px solid #eee; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        button { background: #007aff; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
-        input { width: 90%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 10px; }
+        body { font-family: -apple-system, system-ui; background: #f0f0f5; text-align: center; padding: 40px 20px; }
+        .box { background: white; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 350px; margin: auto; }
+        .app { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        button { background: #007aff; color: white; border: none; padding: 10px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ccc; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Downloads</h1>
-        <input type="text" id="suche" placeholder="App suchen..." onkeyup="filterApps()">
-        <div id="liste"></div>
+    <div class="box">
+        <h2>App Download</h2>
+        <input type="text" id="s" placeholder="Suchen..." onkeyup="search()">
+        <div id="l"></div>
     </div>
 
     <script>
-        const meineApps = [
-            { name: "Tennis TV", id: "1114471030" },
-            { name: "Roblox", id: "431946152" },
-            { name: "ChatGPT", id: "6448311069" },
-            { name: "Gemini", id: "6477489729" }
+        const apps = [
+            { n: "Tennis TV", i: "1114471030" },
+            { n: "Roblox", i: "431946152" },
+            { n: "ChatGPT", i: "6448311069" },
+            { n: "Gemini", i: "6477489729" }
         ];
 
-        function zeigeApps(liste) {
-            const container = document.getElementById('liste');
-            container.innerHTML = "";
-            liste.forEach(app => {
-                const item = document.createElement('div');
-                item.className = 'app-item';
-                item.innerHTML = `<strong>${app.name}</strong><button onclick="lade('${app.id}')">Laden</button>`;
-                container.appendChild(item);
+        function render(data) {
+            const list = document.getElementById('l');
+            list.innerHTML = "";
+            data.forEach(a => {
+                list.innerHTML += `<div class="app"><span>${a.n}</span><button onclick="go('${a.i}')">Laden</button></div>`;
             });
         }
 
-        function filterApps() {
-            const query = document.getElementById('suche').value.toLowerCase();
-            zeigeApps(meineApps.filter(a => a.name.toLowerCase().includes(query)));
+        function search() {
+            const val = document.getElementById('s').value.toLowerCase();
+            render(apps.filter(x => x.n.toLowerCase().includes(val)));
         }
 
-        function lade(id) {
-            // Seite mit ID neu laden - das aktiviert den Banner oben
-            window.location.href = window.location.origin + window.location.pathname + "?id=" + id;
+        function go(i) {
+            // Wir erzwingen einen sauberen Reload mit der ID
+            // Das ist wichtig, weil Safari den Banner beim Navigieren neu prüft
+            window.location.href = window.location.origin + window.location.pathname + "?id=" + i;
         }
 
-        zeigeApps(meineApps);
+        render(apps);
     </script>
 </body>
 </html>
