@@ -5,26 +5,22 @@
     <title>App Downloader</title>
     
     <script>
-        // Dieser Teil checkt, ob wir gerade eine App "laden" wollen
+        // SOFORT-CHECK: Wir schreiben das Meta-Tag direkt in den Head, 
+        // bevor der Browser die Seite fertig interpretiert.
         const params = new URLSearchParams(window.location.search);
         const appId = params.get('id');
 
         if (appId) {
-            // Wenn eine ID in der URL ist, sagen wir Safari: "Zeig den Banner!"
-            var meta = document.createElement('meta');
-            meta.name = "apple-itunes-app";
-            meta.content = "app-id=" + appId;
-            document.getElementsByTagName('head')[0].appendChild(meta);
+            document.write('<meta name="apple-itunes-app" content="app-id=' + appId + '">');
         }
     </script>
 
     <style>
-        /* Ein bisschen einfaches Design, damit es nicht ganz leer aussieht */
         body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
         input { width: 90%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 20px; }
         .app-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        button { background: #007aff; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; }
+        button { background: #007aff; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -36,13 +32,11 @@
     </div>
 
     <script>
-        // DEINE MANUELLE LISTE (Hier kannst du Apps hinzufügen)
         const meineApps = [
             { name: "Tennis TV", id: "1114471030", downloads: 67 },
             { name: "Gemini", id: "6477489729", downloads: 67 },
             { name: "Chatgpt", id: "6448311069", downloads: 67 },
             { name: "Roblox", id: "431946152", downloads: 67 }
-            
         ];
 
         function zeigeApps(liste) {
@@ -68,14 +62,11 @@
         }
 
         function ladeApp(id) {
-            // Trick: Seite neu laden mit der ID in der URL
-            window.location.href = "?id=" + id;
+            // Seite neu laden mit ID
+            window.location.href = window.location.pathname + "?id=" + id;
         }
 
-        // Start: Alle Apps anzeigen
         zeigeApps(meineApps);
     </script>
 </body>
 </html>
-
-
