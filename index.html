@@ -2,19 +2,20 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>App Downloader</title>
-    
     <script>
-        // SOFORT-CHECK: Wir schreiben das Meta-Tag direkt in den Head, 
-        // bevor der Browser die Seite fertig interpretiert.
-        const params = new URLSearchParams(window.location.search);
-        const appId = params.get('id');
-
+        // Wir holen die ID direkt aus der URL, noch bevor der Head geladen ist
+        const urlParams = new URLSearchParams(window.location.search);
+        const appId = urlParams.get('id');
+        
         if (appId) {
-            document.write('<meta name="apple-itunes-app" content="app-id=' + appId + '">');
+            // Wir erstellen das Meta-Tag als String und werfen es direkt rein
+            const meta = document.createElement('meta');
+            meta.name = "apple-itunes-app";
+            meta.content = "app-id=" + appId;
+            document.head.appendChild(meta);
         }
     </script>
-
+    <title>App Downloader</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
@@ -62,8 +63,8 @@
         }
 
         function ladeApp(id) {
-            // Seite neu laden mit ID
-            window.location.href = window.location.pathname + "?id=" + id;
+            // Wir hängen einen Zeitstempel an, um den Cache zu umgehen
+            window.location.href = window.location.pathname + "?id=" + id + "&t=" + new Date().getTime();
         }
 
         zeigeApps(meineApps);
