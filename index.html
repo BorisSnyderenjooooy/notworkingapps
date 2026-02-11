@@ -2,29 +2,51 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <script>
-        // Wir holen die ID direkt aus der URL, noch bevor der Head geladen ist
-        const urlParams = new URLSearchParams(window.location.search);
-        const appId = urlParams.get('id');
-        
-        if (appId) {
-            // Wir erstellen das Meta-Tag als String und werfen es direkt rein
-            const meta = document.createElement('meta');
-            meta.name = "apple-itunes-app";
-            meta.content = "app-id=" + appId;
-            document.head.appendChild(meta);
-        }
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Downloader</title>
+    
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; text-align: center; }
+        
+        /* Der Custom Safari Banner Style */
+        #custom-banner {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 64px;
+            background: #f8f8f8;
+            border-bottom: 0.5px solid #b2b2b2;
+            z-index: 1000;
+            align-items: center;
+            padding: 0 10px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .banner-close { color: #888; font-size: 20px; margin-right: 10px; cursor: pointer; text-decoration: none; padding: 5px; }
+        .banner-icon { width: 44px; height: 44px; border-radius: 9px; background: #ddd; margin-right: 12px; object-fit: cover; }
+        .banner-info { flex-grow: 1; }
+        .banner-info strong { display: block; font-size: 13px; color: #000; }
+        .banner-info small { display: block; font-size: 11px; color: #666; }
+        .banner-button { background: transparent; color: #007aff; font-weight: bold; font-size: 14px; text-decoration: none; padding: 5px 10px; }
+
+        /* Restliches Design */
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 80px auto 0; }
         input { width: 90%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 20px; }
         .app-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        button { background: #007aff; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; cursor: pointer; }
+        .load-btn { background: #007aff; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    <div id="custom-banner">
+        <div class="banner-close" onclick="closeBanner()">×</div>
+        <img id="banner-img" class="banner-icon" src="" alt="icon">
+        <div class="banner-info">
+            <strong id="banner-name">App Name</strong>
+            <small id="banner-sub">Im App Store erhältlich</small>
+        </div>
+        <a id="banner-link" class="banner-button" href="#">ANZEIGEN</a>
+    </div>
 
     <div class="card">
         <h1>App-Downloader</h1>
@@ -35,9 +57,9 @@
     <script>
         const meineApps = [
             { name: "Tennis TV", id: "1114471030", downloads: 67 },
-            { name: "Gemini", id: "6477489729", downloads: 67 },
-            { name: "Chatgpt", id: "6448311069", downloads: 67 },
-            { name: "Roblox", id: "431946152", downloads: 67 }
+            { name: "Gemini", id: "6477489729", downloads: 120 },
+            { name: "ChatGPT", id: "6448311069", downloads: 450 },
+            { name: "Roblox", id: "431946152", downloads: 980 }
         ];
 
         function zeigeApps(liste) {
@@ -50,7 +72,7 @@
                             <strong>${app.name}</strong><br>
                             <small>${app.downloads} Downloads</small>
                         </div>
-                        <button onclick="ladeApp('${app.id}')">Laden</button>
+                        <button class="load-btn" onclick="ladeApp('${app.id}', '${app.name}')">Laden</button>
                     </div>
                 `;
             });
@@ -62,9 +84,39 @@
             zeigeApps(gefiltert);
         }
 
-        function ladeApp(id) {
-            // Wir hängen einen Zeitstempel an, um den Cache zu umgehen
-            window.location.href = window.location.pathname + "?id=" + id + "&t=" + new Date().getTime();
+        function ladeApp(id, name) {
+            // 1. Native Meta-Tag für Safari trotzdem setzen (als Backup)
+            let meta = document.querySelector('meta[name="apple-itunes-app"]');
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.name = "apple-itunes-app";
+                document.head.appendChild(meta);
+            }
+            meta.content = "app-id=" + id;
+
+            // 2. Custom Banner anzeigen (funktioniert immer)
+            document.getElementById('banner-name').innerText = name;
+            document.getElementById('banner-link').href = "https://apps.apple.com/app/id" + id;
+            
+            // Icon von Apple laden (optional, hier Platzhalter)
+            document.getElementById('banner-img').src = "https://is1-ssl.mzstatic.com/image/thumb/Purple/v4/app-icon.png/100x100bb.png"; 
+            
+            document.getElementById('custom-banner').style.display = 'flex';
+            
+            // Optional: URL in der Leiste ändern ohne Refresh
+            history.pushState(null, "", "?id=" + id);
+        }
+
+        function closeBanner() {
+            document.getElementById('custom-banner').style.display = 'none';
+        }
+
+        // Checken ob ID beim Start in URL ist
+        const params = new URLSearchParams(window.location.search);
+        const startId = params.get('id');
+        if (startId) {
+            const app = meineApps.find(a => a.id === startId);
+            if (app) ladeApp(app.id, app.name);
         }
 
         zeigeApps(meineApps);
