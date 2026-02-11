@@ -4,71 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        // Dieser Block MUSS ganz oben stehen, damit Safari das Meta-Tag sofort sieht
-        const params = new URLSearchParams(window.location.search);
-        const appId = params.get('id');
+        // Direkt-Check beim Laden
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentId = urlParams.get('id');
 
-        if (appId) {
-            // Wir erstellen das Meta-Tag direkt im Dokumenten-Stream
-            // Das ist die "aggressivste" Methode für Safari
-            document.write('<meta name="apple-itunes-app" content="app-id=' + appId + '">');
+        if (currentId) {
+            // Wir erzwingen das Meta-Tag VOR allem anderen
+            const metaTag = document.createElement('meta');
+            metaTag.name = "apple-itunes-app";
+            metaTag.content = "app-id=" + currentId;
+            document.head.appendChild(metaTag);
         }
     </script>
-    <title>App Store Linker</title>
-    
+    <title>App Center</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; text-align: center; margin: 0; }
         .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 20px auto; }
-        input { width: 90%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 20px; font-size: 16px; }
-        .app-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        .app-info { text-align: left; }
+        .app-item { border-bottom: 1px solid #eee; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         button { background: #007aff; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
-        .status { font-size: 12px; color: #888; margin-top: 10px; }
+        input { width: 90%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>App Downloader</h1>
+        <h1>Downloads</h1>
         <input type="text" id="suche" placeholder="App suchen..." onkeyup="filterApps()">
         <div id="liste"></div>
-        <p class="status">Falls kein Banner erscheint: Prüfe, ob die App bereits installiert ist.</p>
     </div>
 
     <script>
         const meineApps = [
             { name: "Tennis TV", id: "1114471030" },
-            { name: "Gemini", id: "6477489729" },
+            { name: "Roblox", id: "431946152" },
             { name: "ChatGPT", id: "6448311069" },
-            { name: "Roblox", id: "431946152" }
+            { name: "Gemini", id: "6477489729" }
         ];
 
         function zeigeApps(liste) {
-            const htmlListe = document.getElementById('liste');
-            htmlListe.innerHTML = "";
+            const container = document.getElementById('liste');
+            container.innerHTML = "";
             liste.forEach(app => {
-                htmlListe.innerHTML += `
-                    <div class="app-item">
-                        <div class="app-info">
-                            <strong>${app.name}</strong><br>
-                            <small>ID: ${app.id}</small>
-                        </div>
-                        <button onclick="ladeApp('${app.id}')">Laden</button>
-                    </div>
-                `;
+                const item = document.createElement('div');
+                item.className = 'app-item';
+                item.innerHTML = `<strong>${app.name}</strong><button onclick="lade('${app.id}')">Laden</button>`;
+                container.appendChild(item);
             });
         }
 
         function filterApps() {
-            const wort = document.getElementById('suche').value.toLowerCase();
-            const gefiltert = meineApps.filter(a => a.name.toLowerCase().includes(wort));
-            zeigeApps(gefiltert);
+            const query = document.getElementById('suche').value.toLowerCase();
+            zeigeApps(meineApps.filter(a => a.name.toLowerCase().includes(query)));
         }
 
-        function ladeApp(id) {
-            // Wir laden die Seite neu und hängen die ID an. 
-            // Durch den Script-Block oben wird das Meta-Tag beim neuen Laden sofort gesetzt.
-            window.location.href = window.location.pathname + "?id=" + id;
+        function lade(id) {
+            // Seite mit ID neu laden - das aktiviert den Banner oben
+            window.location.href = window.location.origin + window.location.pathname + "?id=" + id;
         }
 
         zeigeApps(meineApps);
