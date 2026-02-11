@@ -26,9 +26,22 @@
         button:disabled { background: #ccc; cursor: not-allowed; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
         
-        /* Der neue Footer Hinweis */
         .footer-note { margin-top: 25px; font-size: 13px; color: #888; }
         .footer-note a { color: #007aff; text-decoration: none; font-weight: 500; }
+
+        /* Der Spenden-Button Style */
+        .coffee-btn {
+            display: inline-block;
+            margin-top: 20px;
+            background: #FFDD00;
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
@@ -37,6 +50,14 @@
         <h2>App Download</h2>
         <input type="text" id="s" placeholder="Suchen..." onkeyup="search()">
         <div id="l"></div>
+    </div>
+
+    <div style="max-width: 350px; margin: auto; text-align: left;">
+        <a href="https://www.paypal.com/paypalme/your-profile-slug-or-link-here?amount=5&currency_code=EUR" 
+           onclick="window.location.href='https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=moritz.schmalle09@gmail.com&item_name=Buy%20me%20a%20coffee&currency_code=EUR'; return false;"
+           class="coffee-btn">
+           ☕ Buy me a coffee
+        </a>
     </div>
 
     <div class="footer-note">
