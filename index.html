@@ -9,11 +9,10 @@
 
         if (id) {
             // TRICK 2: Wir bauen das Meta-Tag VOR allem anderen ein.
-            // Wir fügen "mt=8" (steht für App Store) hinzu, das hilft Safari beim Erkennen.
             const meta = document.createElement('meta');
             meta.name = "apple-itunes-app";
             
-            // Wir fügen ein fiktives app-argument hinzu, das simuliert eine tiefere Verknüpfung
+            // "mt=8" signalisiert den App Store
             meta.content = `app-id=${id}, app-argument=https://apps.apple.com/app/id${id}, affiliate-data=ct=install_button&mt=8`;
             
             document.head.appendChild(meta);
@@ -23,8 +22,11 @@
     <style>
         body { font-family: -apple-system, system-ui; background: #f0f0f5; text-align: center; padding: 40px 20px; }
         .box { background: white; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 350px; margin: auto; }
-        .app { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
-        button { background: #007aff; color: white; border: none; padding: 10px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .app { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; text-align: left; }
+        .app-info { display: flex; flex-direction: column; max-width: 70%; }
+        .error-text { color: #ff3b30; font-size: 10px; margin-top: 4px; line-height: 1.2; }
+        button { background: #007aff; color: white; border: none; padding: 10px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ccc; box-sizing: border-box; }
     </style>
 </head>
@@ -38,17 +40,27 @@
 
     <script>
         const apps = [
-            { n: "Tennis TV", i: "1114471030" },
-            { n: "Roblox", i: "431946152" },
-            { n: "ChatGPT (Funktioniert auf Grund der Apple Sicherheitsregeln nicht)", i: "6448311069" },
-            { n: "Gemini (Funktioniert auf Grund der Apple Sicherheitsregeln nicht)", i: "6477489729" }
+            { n: "Tennis TV", i: "1114471030", ok: true },
+            { n: "Roblox", i: "431946152", ok: true },
+            { n: "ChatGPT", i: "6448311069", ok: false, msg: "Apple blockiert Banner auf Drittseiten für diese App." },
+            { n: "Gemini", i: "6477489729", ok: false, msg: "Apple Sicherheitsregeln verhindern den Banner hier." }
         ];
 
         function render(data) {
             const list = document.getElementById('l');
             list.innerHTML = "";
             data.forEach(a => {
-                list.innerHTML += `<div class="app"><span>${a.n}</span><button onclick="go('${a.i}')">Laden</button></div>`;
+                const info = a.ok ? '' : `<span class="error-text">${a.msg}</span>`;
+                const btnAttr = a.ok ? `onclick="go('${a.i}')"` : `disabled`;
+                
+                list.innerHTML += `
+                    <div class="app">
+                        <div class="app-info">
+                            <strong>${a.n}</strong>
+                            ${info}
+                        </div>
+                        <button ${btnAttr}>${a.ok ? 'Laden' : 'N/A'}</button>
+                    </div>`;
             });
         }
 
@@ -58,8 +70,6 @@
         }
 
         function go(i) {
-            // Wir erzwingen einen sauberen Reload mit der ID
-            // Das ist wichtig, weil Safari den Banner beim Navigieren neu prüft
             window.location.href = window.location.origin + window.location.pathname + "?id=" + i;
         }
 
@@ -67,4 +77,3 @@
     </script>
 </body>
 </html>
-
