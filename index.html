@@ -2,60 +2,77 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Mein App Downloader</title>
+    <title>App Downloader</title>
+    
+    <script>
+        // Dieser Teil checkt, ob wir gerade eine App "laden" wollen
+        const params = new URLSearchParams(window.location.search);
+        const appId = params.get('id');
+
+        if (appId) {
+            // Wenn eine ID in der URL ist, sagen wir Safari: "Zeig den Banner!"
+            var meta = document.createElement('meta');
+            meta.name = "apple-itunes-app";
+            meta.content = "app-id=" + appId;
+            document.getElementsByTagName('head')[0].appendChild(meta);
+        }
+    </script>
+
     <style>
-        /* Hier kommt später das Design rein, wenn du willst */
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-        .app-box { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #ddd; }
-        button { background: linear-gradient(to right, #a855f7, #fbbf24); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+        /* Ein bisschen einfaches Design, damit es nicht ganz leer aussieht */
+        body { font-family: -apple-system, sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        input { width: 90%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .app-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+        button { background: #007aff; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>App Downloader</h1>
-    
-    <input type="text" id="suchFeld" placeholder="App suchen..." onkeyup="sucheFunktion()" style="width: 100%; padding: 10px; margin-bottom: 20px;">
-
-    <div id="liste"></div>
+    <div class="card">
+        <h1>App-Downloader</h1>
+        <input type="text" id="suche" placeholder="App suchen..." onkeyup="filterApps()">
+        <div id="liste"></div>
+    </div>
 
     <script>
-        // SCHRITT 3: HIER KOMMEN DEINE APPS REIN
+        // DEINE MANUELLE LISTE (Hier kannst du Apps hinzufügen)
         const meineApps = [
-            { name: "Tennis TV", id: "1114471030", downloads: 67 },
-            { name: "Gemini", id: "6477489729", downloads: 67 }
+            { name: "tennis tv", id: "1114471030", downloads: 622 },
+            { name: "Netflix", id: "363590051", downloads: 105 },
+            { name: "Minecraft", id: "479516143", downloads: 88 }
         ];
 
-        // Diese Funktion baut die Liste auf dem Bildschirm
-        function zeichneApps(appsZumAnzeigen) {
-            const container = document.getElementById('liste');
-            container.innerHTML = ""; // Vorher alles leeren
-
-            appsZumAnzeigen.forEach(app => {
-                container.innerHTML += `
-                    <div class="app-box">
-                        <strong>${app.name}</strong><br>
-                        <span>Downloads: ${app.downloads}</span><br><br>
-                        <button onclick="oeffneApp('${app.id}')">Laden</button>
+        function zeigeApps(liste) {
+            const htmlListe = document.getElementById('liste');
+            htmlListe.innerHTML = "";
+            liste.forEach(app => {
+                htmlListe.innerHTML += `
+                    <div class="app-item">
+                        <div>
+                            <strong>${app.name}</strong><br>
+                            <small>${app.downloads} Downloads</small>
+                        </div>
+                        <button onclick="ladeApp('${app.id}')">Laden</button>
                     </div>
                 `;
             });
         }
 
-        // SCHRITT 4: DIE LOGIK
-        function sucheFunktion() {
-            const begriff = document.getElementById('suchFeld').value.toLowerCase();
-            const gefiltert = meineApps.filter(a => a.name.toLowerCase().includes(begriff));
-            zeichneApps(gefiltert);
+        function filterApps() {
+            const wort = document.getElementById('suche').value.toLowerCase();
+            const gefiltert = meineApps.filter(a => a.name.toLowerCase().includes(wort));
+            zeigeApps(gefiltert);
         }
 
-        function oeffneApp(id) {
-            // Leitet zum offiziellen Store-Link weiter
-            window.location.href = "https://apps.apple.com/app/id" + id;
+        function ladeApp(id) {
+            // Trick: Seite neu laden mit der ID in der URL
+            window.location.href = "?id=" + id;
         }
 
-        // Start: Einmal alle Apps zeigen
-        zeichneApps(meineApps);
+        // Start: Alle Apps anzeigen
+        zeigeApps(meineApps);
     </script>
-
 </body>
 </html>
+
